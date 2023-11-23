@@ -37,7 +37,7 @@ class DB:
 class Table:
     def __init__(self, table_name, table):
         self.table_name = table_name
-        self.table = table.get_lst
+        self.table = table
     
     def join(self, other_table, common_key):
         joined_table = Table(self.table_name + '_joins_' + other_table.table_name, [])
@@ -99,8 +99,8 @@ class Table:
             if i[id_key] == id_value:
                 i[key] = value
 
-if __name__ == __name__:
+if __name__ == '__main__':
     persons = CSV_reader('persons')
-    mytable = Table('person', persons)
+    mytable = Table('person', persons.get_lst)
     mytable.update('ID', '7447677', 'ID', 'a')
     print(mytable)
