@@ -1,9 +1,20 @@
-# import database module
+import database, csv, os
 
 # define a funcion called initializing
 
 def initializing():
-    pass
+    global DB
+    DB = database.DB()
+    for files in os.listdir(os.getcwd()):
+        if files.endswith('.csv'):
+            file_name = os.path.splitext(files)[0]
+            print(file_name)
+            content = database.CSV_reader(file_name).get_lst
+            temp_table = database.Table(file_name, content)
+            DB.insert(temp_table)
+    
+    # test code
+    # print(DB.search('login'))
 
 # here are things to do in this function:
 
