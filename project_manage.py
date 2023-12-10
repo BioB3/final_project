@@ -30,8 +30,14 @@ def initializing():
 # define a funcion called login
 
 def login():
-    pass
-
+    username = input('Enter username: ')
+    password = input('Enter password: ')
+    output = DB.search('login').filter(lambda x: x['username'] == username 
+            and x['password'] == password).select(['ID', 'role'])
+    if output != []:
+        return output
+    else:
+        return None
 # here are things to do in this function:
    # add code that performs a login task
         # ask a user for a username and password
