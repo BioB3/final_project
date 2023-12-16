@@ -36,13 +36,18 @@ class request:
             f_name = person.filter(lambda x: x["ID"] == _ID).table[0]
             print(f"Sent request to {f_name['fist']} {f_name['last']}")
             
-        def view_request(self, person_ID, to_be):
-            for _ in self.__table.filter(lambda x: x[f"to_be_{to_be}"] == person_ID and x['response'] == None).table:
-                print(_)
+    def view_request(self, person_ID, to_be):
+        count = 0
+        temp_tap = self.__table.filter(lambda x: x[f"to_be_{to_be}"] == person_ID and x["Response"] == "")
+        for _ in temp_tap.select(["ProjectID", f'to_be_{to_be}']):
+            count += 1
+            print(f"{count})")
+            for n, m in _.items():
+                print(f"|   {n} : {m}")
         
-        def view_status(self, project_ID):
-            for _ in self.__table.filter(lambda x: x[f"ProjectID"] == project_ID).table:
-                print(_)
+    def view_status(self, project_ID):
+        for _ in self.__table.filter(lambda x: x["ProjectID"] == project_ID).table:
+            print(_)
 
 class project:
     def __init__(self, table) -> None:
@@ -98,4 +103,7 @@ if __name__ == "__main__":
     a_p.update(a_p.get_id(1228464), "Detail", "fqfdqcdqw")
     a_p.show_status(a_p.get_id(1228464))
     a_r = request(member_pending_request)
-    # a_r.create_r(a_p.get_id(1228464), person, "student", "member")
+    a_r.create_r(a_p.get_id(1228464), person, "student", "member")
+    a_r.view_request("7476758", "member")
+    a_r.view_request("5086282", "member")
+    a_r.view_status(a_p.get_id(1228464))
