@@ -48,6 +48,26 @@ class request:
     def view_status(self, project_ID):
         for _ in self.__table.filter(lambda x: x["ProjectID"] == project_ID).table:
             print(_)
+    
+    def respond(self, project_ID, person_ID, to_be, login_table = None, person_table = None, proj = None):
+        if login_table == None:
+            response = "n"
+        else:
+            response = input("Enter your response (y/n) :")
+        for _req in self.__table.table:
+            if _req["ProjectID"] == project_ID and _req[f"to_be_{to_be}"] == person_ID:
+                _req["Response_date"] = datetime.datetime.now().strftime("%d-%m-%Y")
+                if response.lower() == "y":
+                    _req["Response"] = "Accepted"
+                    login_table.update("ID", person_ID, "role", to_be)
+                    person_table.update("ID", person_ID, "type", to_be)
+                    proj.update(project_ID, to_be.capitalize(), person_ID)
+                    if to_be.lower() == "member":
+                        for _other_req in self.__table.table:
+                            if _other_req["ProjectID"] != project_ID and _other_req[f"to_be_{to_be}"] == person_ID:
+                                self.respond(project_ID, person_ID, to_be)
+                elif response.lower() == "n":
+                    _req["Response"] = "Rejected"
 
 class project:
     def __init__(self, table) -> None:
@@ -78,6 +98,11 @@ class project:
         return self.__table.filter(lambda x: x["Lead"] == lead_ID).table[0]["ProjectID"]
     
     def update(self, project_ID, key, value):
+        cw_dict = self.__table.filter(lambda x: x["ProjectID"] == project_ID).table[0]
+        if key.lower() == "member" and cw_dict["Member1"] == "":
+            key = "Member1"
+        elif key.lower() == "member" and cw_dict["Member1"] != "":
+            key = "Member2"
         self.__table.update("ProjectID", project_ID, key, value)
     
     def show_status(self, project_ID):
@@ -104,6 +129,11 @@ if __name__ == "__main__":
     a_p.show_status(a_p.get_id(1228464))
     a_r = request(member_pending_request)
     a_r.create_r(a_p.get_id(1228464), person, "student", "member")
-    a_r.view_request("7476758", "member")
     a_r.view_request("5086282", "member")
     a_r.view_status(a_p.get_id(1228464))
+    a_r.respond("1", "5086282", "member", login, person, a_p)
+    a_r.view_request("5086282", "member")
+    a_r.view_status(a_p.get_id(1228464))
+    print(login)
+    print(person)
+    a_p.show_status(a_p.get_id(1228464))
