@@ -36,12 +36,20 @@ class DB:
 
 class Table:
     def __init__(self, table_name, table):
-        self.table_name = table_name
-        self.table = table
+        self.__table_name = table_name
+        self.__table = table
+    
+    @property
+    def table_name(self):
+        return self.__table_name
+    
+    @property
+    def table(self):
+        return self.__table
     
     def join(self, other_table, common_key):
-        joined_table = Table(self.table_name + '_joins_' + other_table.table_name, [])
-        for item1 in self.table:
+        joined_table = Table(self.__table_name + '_joins_' + other_table.table_name, [])
+        for item1 in self.__table:
             for item2 in other_table.table:
                 if item1[common_key] == item2[common_key]:
                     dict1 = copy.deepcopy(item1)
@@ -51,7 +59,7 @@ class Table:
         return joined_table
     
     def filter(self, condition):
-        filtered_table = Table(self.table_name + '_filtered', [])
+        filtered_table = Table(self.__table_name + '_filtered', [])
         for item1 in self.table:
             if condition(item1):
                 filtered_table.table.append(item1)
@@ -68,7 +76,7 @@ class Table:
 
     def aggregate(self, function, aggregation_key):
         temps = []
-        for item1 in self.table:
+        for item1 in self.__table:
             if self.__is_float(item1[aggregation_key]):
                 temps.append(float(item1[aggregation_key]))
             else:
@@ -77,7 +85,7 @@ class Table:
 
     def select(self, attributes_list):
         temps = []
-        for item1 in self.table:
+        for item1 in self.__table:
             dict_temp = {}
             for key in item1:
                 if key in attributes_list:
