@@ -35,7 +35,7 @@ def login():
     output = DB.search('login').filter(lambda x: x['username'] == username 
             and x['password'] == password).select(['ID', 'role'])
     if output != []:
-        return output
+        return [output[0]["ID"], output[0]["role"]]
     else:
         return None
 # here are things to do in this function:
@@ -45,7 +45,21 @@ def login():
 
 # define a function called exit
 def exit():
-    pass
+    for _ in DB.database:
+        if _.table != []:
+            filename = _.table_name + ".csv"
+            myFile = open(filename, "w", newline="")
+            writer = csv.writer(myFile)
+            writer.writerow(Head for Head in _.table[0])
+            for dictionary in _.table:
+                writer.writerow(dictionary.values())
+            myFile.close()
+            with open(filename) as myFile:
+                lines = myFile.readlines()
+                last_line = lines[len(lines)-1]
+                lines[len(lines)-1] = last_line.rstrip()
+            with open(filename, 'w') as myFile:    
+                myFile.writelines(lines)
 
 # here are things to do in this function:
    # write out all the tables that have been modified to the corresponding csv files
