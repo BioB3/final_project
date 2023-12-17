@@ -37,15 +37,18 @@ class request:
             f_name = person_table.filter(lambda x: x["ID"] == _ID).table[0]
             print(f"Sent request to {f_name['fist']} {f_name['last']}")
             
-    def view_request(self, person_ID, to_be):
+    def view_request(self, person_ID, to_be, project_table):
         count = 0
-        temp_tap = self.__table.filter(lambda x: x[f"to_be_{to_be}"] == person_ID and\
-            x["Response"] == "")
-        for _ in temp_tap.select(["ProjectID", f'to_be_{to_be}']):
+        temp_tap = self.__table.filter(lambda x: x[f"to_be_{to_be}"] == person_ID and x["Response"] == "")
+        for _ in temp_tap.select(["ProjectID"]):
             count += 1
             print(f"{count})")
             for n, m in _.items():
                 print(f"|   {n} : {m}")
+                temp_detail = project_table.get_tab.filter(lambda x: x["ProjectID"] == m).select(["Title", "Detail"])[0]
+                print(f"|   Title : {temp_detail['Title']}")
+                print(f"|   Detail : {temp_detail['Detail']}")
+                
         
     def view_status(self, project_ID):
         for _ in self.__table.filter(lambda x: x["ProjectID"] == project_ID).table:
@@ -69,6 +72,9 @@ class request:
                         if to_be.lower() == "member" and _other_req["ProjectID"] != project_ID\
                             and _other_req[f"to_be_{to_be}"] == person_ID:
                             self.respond(_other_req["ProjectID"], person_ID, to_be)
+                        if to_be.lower() == "member" and not proj.check_member(project_ID)\
+                            and _other_req["Response"] == "":
+                            self.respond(project_ID, _other_req[f"to_be_{to_be}"], to_be)
                         if to_be.lower() == "advisor":
                             proj.update(project_ID, "Status", "in progress")
                             if _other_req["ProjectID"] == project_ID\
@@ -89,7 +95,8 @@ class project:
     def create_p(self, lead_ID, login_table, person_table):
         temp_dict = {}
         temp_dict["ProjectID"] = str(len(self.__table.table) + 1)
-        temp_dict["Title"] = input("Enter Project's Title: ")
+        title = input("Enter Project's Title: ")
+        temp_dict["Title"] = title
         temp_dict["Lead"] = lead_ID
         temp_dict["Member1"] = ""
         temp_dict["Member2"] = ""
@@ -100,8 +107,16 @@ class project:
         person_table.update("ID", lead_ID, "type", "lead")
         self.__table.insert(temp_dict)
         
-    def get_id(self, lead_ID):
-        return self.__table.filter(lambda x: x["Lead"] == lead_ID).table[0]["ProjectID"]
+    def get_id(self, _ID):
+        return self.__table.filter(lambda x: x["Lead"] == _ID or x["Member1"] == _ID or\
+            x["Member2"] == _ID).table[0]["ProjectID"]
+        
+    def check_member(self, project_ID):
+        cw_dict = self.__table.filter(lambda x: x["ProjectID"] == project_ID).table[0]
+        if cw_dict["Member1"] != "" and cw_dict["Member2"] != "":
+            return False
+        else:
+            return True
     
     def update(self, project_ID, key, value):
         cw_dict = self.__table.filter(lambda x: x["ProjectID"] == project_ID).table[0]
@@ -121,9 +136,9 @@ class User:
         self.__ID = ID
         self.__role = role
         self.__database = database
-        self.__project = project(self.__database.search("project"))
+        self.__project_table = project(self.__database.search("project"))
         self.__member_req = request(self.__database.search("member_pending_request"))
-        self.__advisor_re1 = request(self.__database.search("advisor_pending_request"))
+        self.__advisor_req = request(self.__database.search("advisor_pending_request"))
         self.__login_table = self.__database.search("login")
         self.__person_table = self.__database.search("persons")
     
@@ -134,39 +149,104 @@ class User:
         print(f"Welcome! {self.__person_table.filter(lambda x: x['ID'] == self.__ID).table[0]['fist']}" +
               f" {self.__person_table.filter(lambda x: x['ID'] == self.__ID).table[0]['last']}")
         self.update_role()
-        print(f"Your role is {self.__role}. Please choose one of the following choice.")
+        print(f"Your role is {self.__role}. Please choose one of the following choice:")
         if self.__role == "student":
-            print("• Inbox\n• Create a Project\n")
+            print("• Inbox\n• Create a Project")
         elif self.__role == "lead":
-            print("• View Project\n• Invite members\n• Invite Supervisor\n• Edit Project\n• Sumbit Project")
+            print("• Project Status\n• Invite Members\n• Invite Supervisor\n\
+• View Invitations\n• Edit Project\n• Submit Project")
         elif self.__role == "member":
-            print("• View Project\n• Edit Project")
+            print("• Project Status\n• Edit Project")
         elif self.__role == "faculty" or self.__role == "advisor":
             print("• Inbox\nView Projects")
+            if self.__role == "advisor":
+                print("• View Evaluation\n• Approve Project")
+        elif self.__role == "admin":
+            print("• View Tables\n• Update Tables")
+        print("• Exit")
+        m_choice = input().lower()
+        while m_choice != "exit":
+            if m_choice == "Congrat! You broke my program.":
+                break
+            m_choice = self.navigate(m_choice.lower())
+            print("*"*50)
+        if m_choice == "exit":
+            return
+        print()
+        self.menu()
+            
 
-if __name__ == "__main__":
-    my_DB = database.DB()
-    for files in os.listdir(os.getcwd()):
-        if files.endswith('.csv'):
-            file_name = os.path.splitext(files)[0]
-            content = database.CSV_reader(file_name).get_lst
-            temp_table = database.Table(file_name, content)
-            my_DB.insert(temp_table)
-    login = my_DB.search("login")
-    person = my_DB.search("persons")
-    _project = my_DB.search("project")
-    member_pending_request = my_DB.search("member_pending_request")
-    advisor_pending_request = my_DB.search("advisor_pending_request")
-    a_p = project(_project)
-    a_p.create_p(1228464, login, person)
-    a_p.update(a_p.get_id(1228464), "Detail", "fqfdqcdqw")
-    a_p.show_status(a_p.get_id(1228464))
-    a_r = request(advisor_pending_request)
-    a_r.create_r(a_p.get_id(1228464), person, "faculty", "advisor")
-    a_r.view_status(a_p.get_id(1228464))
-    a_r.respond("1", "8347432", "advisor", login, person, a_p)
-    a_r.view_status(a_p.get_id(1228464))
-    print(login)
-    print(person)
-    print(_project)
-    a_p.show_status(a_p.get_id(1228464))
+    def navigate(self, choice):
+        if choice == "inbox" and self.__role in ["student", "faculty", "advisor"]:
+                self.inbox()
+        elif choice == "create a project" and self.__role == "student":
+            self.__project_table.create_p(self.__ID, self.__login_table, self.__person_table)
+        elif choice == "project status" and self.__role in ["member", "lead"]:
+            self.__project_table.show_status(self.__project_table.get_id(self.__ID))
+        elif choice == "edit project" and self.__role in ["member", "lead"]:
+            if self.__role == "member":
+                changes = input("Enter Detail (leave blank to cancel) : ")
+                if changes != "":
+                    self.__project_table.update(self.__project_table.get_id(self.__ID),"Detail", changes)
+            elif self.__role == "lead":
+                t_or_d = ""
+                while t_or_d not in ["title", "detail"]:
+                    t_or_d = input("Edit Title or Detail: ").lower()
+                changes = input(f"Enter {t_or_d.capitalize()} (leave blank to cancel): ")
+                if changes != "":
+                    if t_or_d == "title":
+                        self.__project_table.update(self.__project_table.get_id(self.__ID),"Title", changes)
+                    elif t_or_d == "detail":
+                        self.__project_table.update(self.__project_table.get_id(self.__ID),"Detail", changes)
+        elif choice == "invite members" and self.__role == "lead":
+            if self.__project_table.check_member(self.__project_table.get_id(self.__ID)):
+                self.__member_req.create_r(self.__project_table.get_id(self.__ID),\
+                    self.__person_table, "student", "member")
+        else:
+            return input("Invalid Choice. Please Select a Valid Choice: ")
+        return "Congrat! You broke my program."
+
+    def inbox(self):
+        if self.__role == "student":
+            if self.__member_req.get_tab.filter(lambda x: x["to_be_member"] == self.__ID).table != []:
+                print("Request for you to become member:")
+                self.__member_req.view_request(self.__ID, "member", self.__project_table)
+            else:
+                print("There're no requests.")
+                return
+            t_choice = input("Please choose one of the following choice:\n• Respond\n• Menu\n").lower()
+            while t_choice != "menu":
+                if t_choice == "respond":
+                    temp_Pro_ID = input("Enter ID of project you want to respond: ")
+                    self.__member_req.respond(temp_Pro_ID, self.__ID, "member", self.__login_table,\
+                        self.__person_table, self.__project_table)
+                    break
+                else:
+                    print("Invalid Choice.")
+                    t_choice = input("Please select a valid choice: ")
+        elif self.__role == "faculty" or self.__role == "advisor":
+            f_choice = input("Please choose the type of request:\n• To be Advisor\n• To Evaluate\n• Menu\n").lower()
+            while f_choice != "menu":
+                if f_choice == "to be advisor":
+                    if self.__advisor_req.get_tab.filter(lambda x: x["to_be_advisor"] == self.__ID).table != []:
+                        print("Request for you to become advisor:")
+                        self.__advisor_req.view_request(self.__ID, "advisor", self.__project_table)
+                        t_choice = input("Please choose one of the following choice:\n• Respond\n• Menu").lower()
+                        while t_choice != "menu":
+                            if t_choice == "respond":
+                                temp_Pro_ID = input("Enter ID of project you want to respond: ")
+                                self.__advisor_req.respond(temp_Pro_ID, self.__ID, "advisor", self.__login_table,\
+                                    self.__person_table, self.__person_table)
+                                break
+                            else:
+                                print("Invalid Choice.")
+                                t_choice = input("Please select a valid choice: ")
+                            break
+                    else:
+                        print("There're no requests.")
+                        break
+                elif f_choice == "to evaluate":
+                    break
+                else:
+                    print("Invalid Choice.")
+                    t_choice = input("Please select a valid choice: ")
