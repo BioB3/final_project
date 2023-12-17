@@ -8,7 +8,6 @@ def initializing():
     for files in os.listdir(os.getcwd()):
         if files.endswith('.csv'):
             file_name = os.path.splitext(files)[0]
-            print(file_name)
             content = database.CSV_reader(file_name).get_lst
             temp_table = database.Table(file_name, content)
             my_DB.insert(temp_table)
@@ -72,6 +71,9 @@ def exit():
 
 initializing()
 val = login()
+while val == None:
+    print("Incorrect username or password. Please try again")
+    val = login()
 
 # based on the return value for login, activate the code that performs activities according to the role defined for that person_id
 
@@ -87,19 +89,7 @@ val = login()
     # see and do faculty related activities
 # elif val[1] = 'advisor':
     # see and do advisor related activities
-login_table = my_DB.search("login")
-person_table = my_DB.search("persons")
-project_table = my_DB.search("project")
-member_pending_request = my_DB.search("member_pending_request")
-advisor_pending_request = my_DB.search("advisor_pending_request")
-a_p = roles.project(project_table)
-a_p.create_p(1228464, login_table, person_table)
-a_p.update(a_p.get_id(1228464), "Detail", "fqfdqcdqw")
-a_p.show_status(a_p.get_id(1228464))
-a_r = roles.request(advisor_pending_request)
-a_r.create_r(a_p.get_id(1228464), person_table, "faculty", "advisor")
-a_r.view_status(a_p.get_id(1228464))
-a_r.respond("1", "8347432", "advisor", login_table, person_table, a_p)
-a_r.view_status(a_p.get_id(1228464))
+prog = roles.User(val[0], val[1], my_DB)
+prog.menu()
 # once everyhthing is done, make a call to the exit function
 exit()

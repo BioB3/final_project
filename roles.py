@@ -124,6 +124,25 @@ class User:
         self.__project = project(self.__database.search("project"))
         self.__member_req = request(self.__database.search("member_pending_request"))
         self.__advisor_re1 = request(self.__database.search("advisor_pending_request"))
+        self.__login_table = self.__database.search("login")
+        self.__person_table = self.__database.search("persons")
+    
+    def update_role(self):
+        self.__role = self.__login_table.filter(lambda x: x["ID"] == self.__ID).table[0]["role"]
+    
+    def menu(self):
+        print(f"Welcome! {self.__person_table.filter(lambda x: x['ID'] == self.__ID).table[0]['fist']}" +
+              f" {self.__person_table.filter(lambda x: x['ID'] == self.__ID).table[0]['last']}")
+        self.update_role()
+        print(f"Your role is {self.__role}. Please choose one of the following choice.")
+        if self.__role == "student":
+            print("• Inbox\n• Create a Project\n")
+        elif self.__role == "lead":
+            print("• View Project\n• Invite members\n• Invite Supervisor\n• Edit Project\n• Sumbit Project")
+        elif self.__role == "member":
+            print("• View Project\n• Edit Project")
+        elif self.__role == "faculty" or self.__role == "advisor":
+            print("• Inbox\nView Projects")
 
 if __name__ == "__main__":
     my_DB = database.DB()
