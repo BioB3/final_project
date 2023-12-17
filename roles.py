@@ -202,6 +202,23 @@ class User:
             if self.__project_table.check_member(self.__project_table.get_id(self.__ID)):
                 self.__member_req.create_r(self.__project_table.get_id(self.__ID),\
                     self.__person_table, "student", "member")
+        elif choice == "invite supervisor" and self.__role == "lead":
+            pass
+        elif choice == "view invitations" and self.__role == "lead":
+            pass
+        elif choice == "submit project" and self.__role == "lead":
+            pass
+        elif choice == "view projects" and self.__role in ["faculty", "advisor"]:
+            pass
+        elif choice == "view evaluation" and self.__role == "advisor":
+            pass
+        elif choice == "approve project" and self.__role == "advisor":
+            pass
+        elif choice == "view tables" and self.__role == "admin":
+            temp_table_name = input("Enter Table Name: ")
+            print(self.__database.search(temp_table_name))
+        elif choice == "update tables" and self.__role == "admin":
+            pass
         else:
             return input("Invalid Choice. Please Select a Valid Choice: ")
         return "Congrat! You broke my program."
