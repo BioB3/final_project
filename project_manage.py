@@ -1,17 +1,17 @@
-import database, csv, os
+import database, csv, os, roles
 
 # define a funcion called initializing
 
 def initializing():
-    global DB
-    DB = database.DB()
+    global my_DB
+    my_DB = database.DB()
     for files in os.listdir(os.getcwd()):
         if files.endswith('.csv'):
             file_name = os.path.splitext(files)[0]
             print(file_name)
             content = database.CSV_reader(file_name).get_lst
             temp_table = database.Table(file_name, content)
-            DB.insert(temp_table)
+            my_DB.insert(temp_table)
     
     # test code
     # print(DB.search('login'))
@@ -32,7 +32,7 @@ def initializing():
 def login():
     username = input('Enter username: ')
     password = input('Enter password: ')
-    output = DB.search('login').filter(lambda x: x['username'] == username 
+    output = my_DB.search('login').filter(lambda x: x['username'] == username 
             and x['password'] == password).select(['ID', 'role'])
     if output != []:
         return [output[0]["ID"], output[0]["role"]]
@@ -45,7 +45,7 @@ def login():
 
 # define a function called exit
 def exit():
-    for _ in DB.database:
+    for _ in my_DB.database:
         if _.table != []:
             filename = _.table_name + ".csv"
             myFile = open(filename, "w", newline="")
@@ -87,6 +87,19 @@ val = login()
     # see and do faculty related activities
 # elif val[1] = 'advisor':
     # see and do advisor related activities
-
+login_table = my_DB.search("login")
+person_table = my_DB.search("persons")
+project_table = my_DB.search("project")
+member_pending_request = my_DB.search("member_pending_request")
+advisor_pending_request = my_DB.search("advisor_pending_request")
+a_p = roles.project(project_table)
+a_p.create_p(1228464, login_table, person_table)
+a_p.update(a_p.get_id(1228464), "Detail", "fqfdqcdqw")
+a_p.show_status(a_p.get_id(1228464))
+a_r = roles.request(advisor_pending_request)
+a_r.create_r(a_p.get_id(1228464), person_table, "faculty", "advisor")
+a_r.view_status(a_p.get_id(1228464))
+a_r.respond("1", "8347432", "advisor", login_table, person_table, a_p)
+a_r.view_status(a_p.get_id(1228464))
 # once everyhthing is done, make a call to the exit function
 exit()

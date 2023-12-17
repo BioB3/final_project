@@ -34,7 +34,7 @@ class request:
             temp_dict['Response'] = ""
             temp_dict['Response_date'] = ""
             self.__table.insert(temp_dict)
-            f_name = person.filter(lambda x: x["ID"] == _ID).table[0]
+            f_name = person_table.filter(lambda x: x["ID"] == _ID).table[0]
             print(f"Sent request to {f_name['fist']} {f_name['last']}")
             
     def view_request(self, person_ID, to_be):
