@@ -63,6 +63,8 @@ class request:
             response = "n"
         else:
             response = input("Enter your response (y/n) :")
+            while response.lower() not in ["y", "n"]:
+                response = input("Invalid Input. Please enter 'y' or 'n':")
         for _req in self.__table.table:
             if _req["ProjectID"] == project_ID and _req[f"to_be_{to_be}"] == person_ID:
                 _req["Response_date"] = datetime.datetime.now().strftime("%d-%m-%Y")
