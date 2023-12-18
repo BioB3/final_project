@@ -392,8 +392,8 @@ class User:
                         print("There're no requests.")
                         break
                 elif f_choice == "to evaluate":
-                    filtered__eva_req = self.__evaluate_req.get_tab.filter(
-                        lambda x: x["to_evaluate"] == self.__id and x["Response"] != "").table
+                    filtered__eva_req = self.__evaluate_req.get_tab.filter\
+                        (lambda x: x["to_evaluate"] == self.__id and x["Response"] != "").table
                     if filtered__eva_req == []:
                         print("There're no request.")
                         f_choice = "menu"
