@@ -9,13 +9,7 @@ class request:
         return self.__table
 
     def create_r(self, project_id, person_table, from_role, to_be, user_id = ""):
-        if to_be == "report":
-            temp_dict = {}
-            temp_dict["ProjectID"] = project_id
-            temp_dict["Status"] = "waiting for evaluation"
-            self.__table.insert(temp_dict)
-            print("Report sent")
-        elif to_be != "evaluate":
+        if to_be != "evaluate":
             if from_role == "faculty":
                 people = person_table.filter(lambda x: x["type"] == from_role or x["type"] == "advisor")
             elif from_role == "student":
@@ -52,12 +46,16 @@ class request:
                 print(info)
             recruit_id_lst = []
             num_eval = input("Enter the number of evaluaters (min:3): ")
-            while num_eval < 3 or not num_eval.isdigit():
+            while not num_eval.isdigit():
                 num_eval = input("Please Enter a Valid Number: ")
+            while int(num_eval) < 3:
+                num_eval = input("Please Enter a Valid Number: ")
+                if not num_eval.isdigit():
+                    num_eval = 0
             for _ in range(0,3):
                 recruit_id = input("ID of the person to be evaluater: ")
                 while recruit_id not in [i["ID"] for i in people_lst] or recruit_id in recruit_id_lst:
-                    recruit_id = input("Invalid ID, please try again: ")
+                    recruit_id = input("Invalid or Duplicate ID, please try again: ")
                 recruit_id_lst.append(recruit_id)
             print()
             for _id in recruit_id_lst:
@@ -66,7 +64,7 @@ class request:
                 temp_dict[f"to_evaluate"] = _id
                 temp_dict['Response'] = ""
                 temp_dict['Response_date'] = ""
-                temp_dict['Comment'] == ""
+                temp_dict['Comment'] = ""
                 self.__table.insert(temp_dict)
                 f_name = person_table.filter(lambda x: x["ID"] == _id).table[0]
                 print(f"Sent request to {f_name['fist']} {f_name['last']}")
@@ -186,7 +184,6 @@ class User:
         self.__login_table = self.__database.search("login")
         self.__person_table = self.__database.search("persons")
         self.__evaluate_req = request(self.__database.search("evaluate_request"))
-        self.__project_to_ev = request(self.__database.search("project_to_eval"))
 
     def update_role(self):
         self.__role = self.__login_table.filter(lambda x: x["ID"] == self.__id).table[0]["role"]
@@ -207,7 +204,7 @@ class User:
         elif self.__role == "faculty" or self.__role == "advisor":
             print("• Inbox\n• View Projects")
             if self.__role == "advisor":
-                print("• View Evaluation\n• Approve Project")
+                print("• Start Evaluation\n• View Evaluation\n• Approve Project")
         elif self.__role == "admin":
             print("• View Tables\n• Update Tables")
         print("• Exit")
@@ -215,6 +212,7 @@ class User:
         while m_choice != "exit":
             if m_choice == "Congrat! You broke my program.":
                 break
+            print()
             m_choice = self.navigate(m_choice.lower())
             print("*"*50)
         if m_choice == "exit":
@@ -270,8 +268,13 @@ class User:
             elif type_invite == "advisor":
                 self.__advisor_req.view_status(self.__project_table.get_id(self.__id))
         elif choice == "submit project" and self.__role == "lead":
-            self.__project_to_ev.create_r(self.__project_table.get_id(self.__id),\
-                self.__person_table, "", "report")
+            if not self.__project_table.check_m_and_a(self.__project_table.get_id(self.__id),\
+                "advisor"):
+                self.__project_table.p_update(self.__project_table.get_id(self.__id),\
+                    "Status", "waiting for evaluation")
+                print("report sent.")
+            else:
+                print("Your Project doesn't have a Supervisor.")
         elif choice == "view projects" and self.__role in ["faculty", "advisor"]:
             project_count = len(self.__project_table.get_tab.table)
             project_id_lst = []
@@ -282,6 +285,20 @@ class User:
             while temp_pro_id not in [i["ProjectID"] for i in self.__project_table.get_tab.table]:
                 temp_pro_id = input("Please Enter a Valid Project ID: ")
             self.__project_table.show_status(temp_pro_id)
+        elif choice == "start evaluation" and self.__role == "advisor":
+            filtered__project_table = self.__project_table.get_tab.filter(
+                lambda x: x["Advisor"] == self.__id and  x["Status"] == "waiting for evaluation")
+            if filtered__project_table.table == []:
+                print("No projects available for evaluating.")
+            else:
+                print("List of Project(s) avaliable to evaluate:")
+                for pro in filtered__project_table.table:
+                    print(pro)
+                to_eval_pro = input("Enter Project ID: ")
+                while to_eval_pro not in [i["ProjectID"] for i in filtered__project_table.table]:
+                    to_eval_pro = input("Please Enter a Valid Project ID: ")
+                self.__evaluate_req.create_r(to_eval_pro, self.__person_table, "", "evaluate",\
+                    self.__id)
         elif choice == "view evaluation" and self.__role == "advisor":
             pass
         elif choice == "approve project" and self.__role == "advisor":
@@ -365,8 +382,10 @@ class User:
                         print("There're no requests.")
                         break
                 elif f_choice == "to evaluate":
-                    filtered__project_table = self.__project_table.get_tab.filter(\
-                        lambda x: x["Advisor"] == self.__id)
+                    filtered__project_table = self.__project_table.get_tab.filter(
+                        lambda x: x["Advisor"] == self.__id and\
+                            x["Status"] == "waiting for evaluation")
+                    print(filtered__project_table)
                 else:
                     print("Invalid Choice.")
                     t_choice = input("Please select a valid choice: ")
