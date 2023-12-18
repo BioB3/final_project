@@ -48,22 +48,19 @@ class request:
             num_eval = input("Enter the number of evaluaters (min:3): ")
             while num_eval < 3 or not num_eval.isdigit():
                 num_eval = input("Please Enter a Valid Number: ")
-            for count in range(0,3):
+            for _ in range(0,3):
                 recruit_id = input("ID of the person to be evaluater: ")
-                
-                if recruit_id not in [i["ID"] for i in people_lst]:
-                    print("Invalid ID, please try again.")
-                elif recruit_id in [recruit_id]:
-                    pass
-                else:
-                    recruit_id_lst.append(recruit_id)
+                while recruit_id not in [i["ID"] for i in people_lst] or recruit_id in recruit_id_lst:
+                    recruit_id = input("Invalid ID, please try again: ")
+                recruit_id_lst.append(recruit_id)
             print()
             for _id in recruit_id_lst:
                 temp_dict = {}
                 temp_dict["ProjectID"] = project_id
-                temp_dict[f"to_be_{to_be}"] = _id
+                temp_dict[f"to_evaluate"] = _id
                 temp_dict['Response'] = ""
                 temp_dict['Response_date'] = ""
+                temp_dict['Comment'] == ""
                 self.__table.insert(temp_dict)
                 f_name = person_table.filter(lambda x: x["ID"] == _id).table[0]
                 print(f"Sent request to {f_name['fist']} {f_name['last']}")
