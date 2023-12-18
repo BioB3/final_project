@@ -50,7 +50,7 @@ This program does not seperate each role into its own class
 |Role|Action|Method|Class|Completion percentage|
 |----|------|------|----|-----|
 |Admin|View table in the database|menu|User|100%|
-|Admin|Update table in the database|update tables|menu|User|100%|
+|Admin|Update table in the database|menu|User|100%|
 |Student|View requests|menu|User|100%|
 |Student|respond to requests|menu|User|100%|
 |Student|Create project and become lead|menu|User|100%|
@@ -63,7 +63,10 @@ This program does not seperate each role into its own class
 |Lead|Submit final report|menu|User|100%|
 |Faculty and Advisor|View Requests|menu|User|100%|
 |Faculty and Advisor|respond to invite|menu|User|100%|
-|Faculty and Advisor|responf to evaluation request|menu|User|50%|
+|Faculty and Advisor|respond to evaluation request|menu|User|50%|
+|Faculty and Advisor|View projects|menu|User|100%|
+|Advisor|Start Evaluating project|menu|User|10%|
+|Advisor|Approve projects|menu|User|0%|
 
 
 # Bugs
