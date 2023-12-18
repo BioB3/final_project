@@ -396,6 +396,7 @@ class User:
                         lambda x: x["to_evaluate"] == self.__id and x["Response"] != "").table
                     if filtered__eva_req == []:
                         print("There're no request.")
+                        f_choice = "menu"
                     else:
                         print("Project to Evaluate:")
                         for req in filtered__eva_req.select(["ProjectID"]):
@@ -406,4 +407,4 @@ class User:
                         self.__evaluate_req.eval(eva_pro_id, self.__id, self.__project_table)
                 else:
                     print("Invalid Choice.")
-                    t_choice = input("Please select a valid choice: ")
+                    f_choice = input("Please select a valid choice: ")
