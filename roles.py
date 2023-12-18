@@ -38,7 +38,7 @@ class request:
                 f_name = person_table.filter(lambda x: x["ID"] == _id).table[0]
                 print(f"Sent request to {f_name['fist']} {f_name['last']}")
         elif to_be == "evaluate":
-            people = person_table.filter(lambda x: x["type"] == from_role or x["type"] == "advisor"\
+            people = person_table.filter(lambda x: x["type"] == "faculty" or x["type"] == "advisor"\
                 and x["ID"] != user_id)
             people_lst = people.select(["ID", "fist", "last"])
             print("\n List of people available:")
@@ -64,6 +64,10 @@ class request:
                 self.__table.insert(temp_dict)
                 f_name = person_table.filter(lambda x: x["ID"] == _id).table[0]
                 print(f"Sent request to {f_name['fist']} {f_name['last']}")
+        elif to_be == "report":
+            temp_dict = {}
+            temp_dict["ProjectID"] = project_id
+            temp_dict["Status"] = "waiting for evaluation"
 
     def view_request(self, person_id, to_be, project_table):
         count = 0
@@ -180,6 +184,7 @@ class User:
         self.__login_table = self.__database.search("login")
         self.__person_table = self.__database.search("persons")
         self.__evaluate_req = request(self.__database.search("evaluate_request"))
+        self.__project_to_eval = request(self.__database.search("evaluate_request"))
 
     def update_role(self):
         self.__role = self.__login_table.filter(lambda x: x["ID"] == self.__id).table[0]["role"]
@@ -263,7 +268,8 @@ class User:
             elif type_invite == "advisor":
                 self.__advisor_req.view_status(self.__project_table.get_id(self.__id))
         elif choice == "submit project" and self.__role == "lead":
-            pass
+            self.__project_to_eval.create_r(self.__project_table.get_id(self.__id),\
+                self.__person_table, "", "final")
         elif choice == "view projects" and self.__role in ["faculty", "advisor"]:
             project_count = len(self.__project_table.get_tab.table)
             project_id_lst = []
