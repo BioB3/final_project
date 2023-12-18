@@ -48,7 +48,7 @@ class request:
             num_eval = input("Enter the number of evaluaters (min:3): ")
             while not num_eval.isdigit():
                 num_eval = input("Please Enter a Valid Number: ")
-            while int(num_eval) < 3:
+            while int(num_eval) < 3 or int(num_eval) > len(people_lst):
                 num_eval = input("Please Enter a Valid Number: ")
                 if not num_eval.isdigit():
                     num_eval = 0
@@ -123,6 +123,16 @@ class request:
                     if to_be.lower() == "member" or to_be.lower() == "advisor":
                         _req["Response"] = "Rejected"
 
+    def eval(self, project_id, user_id, project_table):
+        project_table.show_status(project_id)
+        for _req in self.__table.table:
+            if _req["ProjectID"] == project_id and _req[f"to_evaluate"] == user_id:
+                _req["Response_date"] = datetime.datetime.now().strftime("%d-%m-%Y")
+                p_or_f = input("Passed or Failed: ").lower()
+                while p_or_f not in ["passed", "failed"]:
+                    p_or_f = input("Passed or Failed: ").lower()
+                _req["Response"] = p_or_f
+                _req["Comment"] = input("Enter Comment: ")
 class project:
     def __init__(self, table) -> None:
         self.__table = table
@@ -382,10 +392,18 @@ class User:
                         print("There're no requests.")
                         break
                 elif f_choice == "to evaluate":
-                    filtered__project_table = self.__project_table.get_tab.filter(
-                        lambda x: x["Advisor"] == self.__id and\
-                            x["Status"] == "waiting for evaluation")
-                    print(filtered__project_table)
+                    filtered__eva_req = self.__evaluate_req.get_tab.filter(
+                        lambda x: x["to_evaluate"] == self.__id and x["Response"] != "").table
+                    if filtered__eva_req == []:
+                        print("There're no request.")
+                    else:
+                        print("Project to Evaluate:")
+                        for req in filtered__eva_req.select(["ProjectID"]):
+                            print(f"• {req}")
+                        eva_pro_id = input("Enter Project ID:")
+                        while eva_pro_id not in [i["ProjectID"] for i in filtered__eva_req]:
+                            eva_pro_id = input("Please Enter a Valid Project ID:")
+                        self.__evaluate_req.eval(eva_pro_id, self.__id, self.__project_table)
                 else:
                     print("Invalid Choice.")
                     t_choice = input("Please select a valid choice: ")
