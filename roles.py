@@ -9,7 +9,13 @@ class request:
         return self.__table
 
     def create_r(self, project_id, person_table, from_role, to_be, user_id = ""):
-        if to_be != "evaluate":
+        if to_be == "report":
+            temp_dict = {}
+            temp_dict["ProjectID"] = project_id
+            temp_dict["Status"] = "waiting for evaluation"
+            self.__table.append(temp_dict)
+            print("Report sent")
+        elif to_be != "evaluate":
             if from_role == "faculty":
                 people = person_table.filter(lambda x: x["type"] == from_role or x["type"] == "advisor")
             elif from_role == "student":
@@ -64,10 +70,6 @@ class request:
                 self.__table.insert(temp_dict)
                 f_name = person_table.filter(lambda x: x["ID"] == _id).table[0]
                 print(f"Sent request to {f_name['fist']} {f_name['last']}")
-        elif to_be == "report":
-            temp_dict = {}
-            temp_dict["ProjectID"] = project_id
-            temp_dict["Status"] = "waiting for evaluation"
 
     def view_request(self, person_id, to_be, project_table):
         count = 0
@@ -184,7 +186,7 @@ class User:
         self.__login_table = self.__database.search("login")
         self.__person_table = self.__database.search("persons")
         self.__evaluate_req = request(self.__database.search("evaluate_request"))
-        self.__project_to_eval = request(self.__database.search("evaluate_request"))
+        self.__project_to_ev = request(self.__database.search("project_to_eval"))
 
     def update_role(self):
         self.__role = self.__login_table.filter(lambda x: x["ID"] == self.__id).table[0]["role"]
@@ -268,8 +270,8 @@ class User:
             elif type_invite == "advisor":
                 self.__advisor_req.view_status(self.__project_table.get_id(self.__id))
         elif choice == "submit project" and self.__role == "lead":
-            self.__project_to_eval.create_r(self.__project_table.get_id(self.__id),\
-                self.__person_table, "", "final")
+            self.__project_to_ev.create_r(self.__project_table.get_id(self.__id),\
+                self.__person_table, "", "report")
         elif choice == "view projects" and self.__role in ["faculty", "advisor"]:
             project_count = len(self.__project_table.get_tab.table)
             project_id_lst = []
@@ -363,7 +365,7 @@ class User:
                         print("There're no requests.")
                         break
                 elif f_choice == "to evaluate":
-                    break
+                    filter_table = ""
                 else:
                     print("Invalid Choice.")
                     t_choice = input("Please select a valid choice: ")
