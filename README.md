@@ -52,11 +52,19 @@ This program does not seperate each role into its own class
 |Admin|View table in the database|menu|User|100%|
 |Admin|Update table in the database|update tables|menu|User|100%|
 |Student|View requests|menu|User|100%|
+|Student|respond to requests|menu|User|100%|
 |Student|Create project and become lead|menu|User|100%|
 |Member|View Project Status|menu|User|100%|
 |Member|Edit Project Detail|menu|User|100%|
 |Lead|View Project Status|menu|User|100%|
-|Lead|Edit Project Detail|menu|User|100%|
+|Lead|Edit Project Title and Detail|menu|User|100%|
+|Lead|Invite member and supervisor|menu|User|100%|
+|Lead|View request sent|menu|User|100%|
+|Lead|Submit final report|menu|User|100%|
+|Faculty and Advisor|View Requests|menu|User|100%|
+|Faculty and Advisor|respond to invite|menu|User|100%|
+|Faculty and Advisor|responf to evaluation request|menu|User|50%|
+
 
 # Bugs
 If user input break line when the program read input, the program will loop to eternity.
