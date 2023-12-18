@@ -8,34 +8,65 @@ class request:
     def get_tab(self):
         return self.__table
 
-    def create_r(self, project_id, person_table, from_role, to_be):
-        if from_role == "faculty":
-            people = person_table.filter(lambda x: x["type"] == from_role or x["type"] == "advisor")
-        elif from_role == "student":
-            people = person_table.filter(lambda x: x["type"] == from_role)
-        people_lst = people.select(["ID", "fist", "last"])
-        print("\n List of people available:")
-        for info in people_lst:
-            print(info)
-        recruit_id_lst = []
-        while True:
-            recruit_id = input("id of the person (leave blank to submit): ")
-            if recruit_id == "":
-                break
-            if recruit_id not in [i["ID"] for i in people_lst]:
-                print("Invalid ID, please try again.")
-            else:
-                recruit_id_lst.append(recruit_id)
-        print()
-        for _id in recruit_id_lst:
-            temp_dict = {}
-            temp_dict["ProjectID"] = project_id
-            temp_dict[f"to_be_{to_be}"] = _id
-            temp_dict['Response'] = ""
-            temp_dict['Response_date'] = ""
-            self.__table.insert(temp_dict)
-            f_name = person_table.filter(lambda x: x["ID"] == _id).table[0]
-            print(f"Sent request to {f_name['fist']} {f_name['last']}")
+    def create_r(self, project_id, person_table, from_role, to_be, user_id = ""):
+        if to_be != "evaluate":
+            if from_role == "faculty":
+                people = person_table.filter(lambda x: x["type"] == from_role or x["type"] == "advisor")
+            elif from_role == "student":
+                people = person_table.filter(lambda x: x["type"] == from_role)
+            people_lst = people.select(["ID", "fist", "last"])
+            print("\n List of people available:")
+            for info in people_lst:
+                print(info)
+            recruit_id_lst = []
+            while True:
+                recruit_id = input("ID of the person (leave blank to submit): ")
+                if recruit_id == "":
+                    break
+                if recruit_id not in [i["ID"] for i in people_lst]:
+                    print("Invalid ID, please try again.")
+                else:
+                    recruit_id_lst.append(recruit_id)
+            print()
+            for _id in recruit_id_lst:
+                temp_dict = {}
+                temp_dict["ProjectID"] = project_id
+                temp_dict[f"to_be_{to_be}"] = _id
+                temp_dict['Response'] = ""
+                temp_dict['Response_date'] = ""
+                self.__table.insert(temp_dict)
+                f_name = person_table.filter(lambda x: x["ID"] == _id).table[0]
+                print(f"Sent request to {f_name['fist']} {f_name['last']}")
+        elif to_be == "evaluate":
+            people = person_table.filter(lambda x: x["type"] == from_role or x["type"] == "advisor"\
+                and x["ID"] != user_id)
+            people_lst = people.select(["ID", "fist", "last"])
+            print("\n List of people available:")
+            for info in people_lst:
+                print(info)
+            recruit_id_lst = []
+            num_eval = input("Enter the number of evaluaters (min:3): ")
+            while num_eval < 3 or not num_eval.isdigit():
+                num_eval = input("Please Enter a Valid Number: ")
+            for count in range(0,3):
+                recruit_id = input("ID of the person to be evaluater: ")
+                
+                if recruit_id not in [i["ID"] for i in people_lst]:
+                    print("Invalid ID, please try again.")
+                elif recruit_id in [recruit_id]:
+                    pass
+                else:
+                    recruit_id_lst.append(recruit_id)
+            print()
+            for _id in recruit_id_lst:
+                temp_dict = {}
+                temp_dict["ProjectID"] = project_id
+                temp_dict[f"to_be_{to_be}"] = _id
+                temp_dict['Response'] = ""
+                temp_dict['Response_date'] = ""
+                self.__table.insert(temp_dict)
+                f_name = person_table.filter(lambda x: x["ID"] == _id).table[0]
+                print(f"Sent request to {f_name['fist']} {f_name['last']}")
 
     def view_request(self, person_id, to_be, project_table):
         count = 0
@@ -151,6 +182,7 @@ class User:
         self.__advisor_req = request(self.__database.search("advisor_pending_request"))
         self.__login_table = self.__database.search("login")
         self.__person_table = self.__database.search("persons")
+        self.__evaluate_req = request(self.__database.search("evaluate_request"))
 
     def update_role(self):
         self.__role = self.__login_table.filter(lambda x: x["ID"] == self.__id).table[0]["role"]
@@ -228,7 +260,7 @@ class User:
         elif choice == "view invitations" and self.__role == "lead":
             type_invite = input("Enter the type of Invitation (Member/Advisor): ").lower()
             while type_invite not in ["member", "advisor"]:
-                type_invite = input("Please Enter a Valid Option: ")
+                type_invite = input("Please Enter a Valid Option: ").lower()
             if type_invite == "member":
                 self.__member_req.view_status(self.__project_table.get_id(self.__id))
             elif type_invite == "advisor":
@@ -236,6 +268,11 @@ class User:
         elif choice == "submit project" and self.__role == "lead":
             pass
         elif choice == "view projects" and self.__role in ["faculty", "advisor"]:
+            project_count = len(self.__project_table.get_tab.table)
+            project_id_lst = []
+            for num in range(1, project_count + 1):
+                project_id_lst.append(num)
+            print(f"Available Projects:\n{project_id_lst}")
             temp_pro_id = input("Enter Project id: ")
             while temp_pro_id not in [i["ProjectID"] for i in self.__project_table.get_tab.table]:
                 temp_pro_id = input("Please Enter a Valid Project ID: ")
@@ -296,7 +333,7 @@ class User:
                     t_choice = input("Please select a valid choice: ")
         elif self.__role == "faculty" or self.__role == "advisor":
             f_choice = input("Please choose the type of request:\n• To be Advisor\n\
-                • To Evaluate\n• Menu\n").lower()
+• To Evaluate\n• Menu\n").lower()
             while f_choice != "menu":
                 if f_choice == "to be advisor":
                     filtered_req = self.__advisor_req.get_tab.filter(lambda x: \
