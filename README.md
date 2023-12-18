@@ -41,7 +41,7 @@ This class recieve id, role, and database to generate its attribute.
   - menu: show the menu use navigate() to run function
   - navigate: run functions based on self.__row and input recieced
   - inbow: show request sent to user
-  - 
+
 # How to run?
   - run the **project_manage.py** file.
 
@@ -51,8 +51,12 @@ This program does not seperate each role into its own class
 |----|------|------|----|-----|
 |Admin|View table in the database|menu|User|100%|
 |Admin|Update table in the database|update tables|menu|User|100%|
-|Student|View requests|Inbox|
-|__str__|print table|None|
+|Student|View requests|menu|User|100%|
+|Student|Create project and become lead|menu|User|100%|
+|Member|View Project Status|menu|User|100%|
+|Member|Edit Project Detail|menu|User|100%|
+|Lead|View Project Status|menu|User|100%|
+|Lead|Edit Project Detail|menu|User|100%|
 
 # Bugs
 If user input break line when the program read input, the program will loop to eternity.
