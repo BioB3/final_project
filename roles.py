@@ -13,7 +13,7 @@ class request:
             temp_dict = {}
             temp_dict["ProjectID"] = project_id
             temp_dict["Status"] = "waiting for evaluation"
-            self.__table.append(temp_dict)
+            self.__table.insert(temp_dict)
             print("Report sent")
         elif to_be != "evaluate":
             if from_role == "faculty":
@@ -365,7 +365,8 @@ class User:
                         print("There're no requests.")
                         break
                 elif f_choice == "to evaluate":
-                    filter_table = ""
+                    filtered__project_table = self.__project_table.get_tab.filter(\
+                        lambda x: x["Advisor"] == self.__id)
                 else:
                     print("Invalid Choice.")
                     t_choice = input("Please select a valid choice: ")
