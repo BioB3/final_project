@@ -97,11 +97,11 @@ This class's needed arguments are id, role, and DB
 |Lead|request supervisor|invite supervisor|check_m_and_a(Project), create_r(Request)|100%|
 |Lead|View requests sent|view invitations|get_id(Project), view_status(Request)|100%|
 |Lead|Submit final report to get project evaluated|submit project|check_m_and_a(Project), get_id(Project), p_update(Project)|100%|
-|Faculty and Advisor|View Requests to be advisor|inbox -> to be advisor|inbox(User)|100%|
-|Faculty and Advisor|View Requests to evaluate project|inbox -> to evaluate|inbox(User)|50%|
-|Faculty and Advisor|respond to reqests to be advisor|inbox -> to be advisor -> respond|inbox(User)|100%|
-|Faculty and Advisor|respond to evaluation request|inbox -> to evaluate -> respond|inbox(User)|50%|
-|Faculty and Advisor|View a project's status|view projects|get_tab(Project), table(Table), show_status(Project)|100%|
+|Faculty, Advisor|View Requests to be advisor|inbox -> to be advisor|inbox(User)|100%|
+|Faculty, Advisor|View Requests to evaluate project|inbox -> to evaluate|inbox(User)|50%|
+|Faculty, Advisor|respond to reqests to be advisor|inbox -> to be advisor -> respond|inbox(User)|100%|
+|Faculty, Advisor|respond to evaluation request|inbox -> to evaluate -> respond|inbox(User)|50%|
+|Faculty, Advisor|View a project's status|view projects|get_tab(Project), table(Table), show_status(Project)|100%|
 |Advisor|Start Evaluating project|start evaluation|filter(Table), table(Table), create_r(Project)|40%|
 |Advisor|View Status of evaluation requests sent|view evaluation|Not implemented|0%|
 |Advisor|Approve projects|approve project|Not implemented|0%|
@@ -110,6 +110,7 @@ This class's needed arguments are id, role, and DB
 # Missing features and outstanding bugs
   - If user input break line when the program read input, the program will loop to eternity.
   - Creating project doesn't automatically rejects request to be member
+  - All function that is not finished or not done will lead to either error or eternal loop.
   - *View request to evaluate project* does not correctly print the requests
   - *View requests to evaluate project* suppose to lead to responding the request by selecting one of the request then update the evaluate_request with the inputted response and comment
   - *View Status of evaluation requests sent* is planned to show all of the requests to be evaluater that the advisor(user) sent
