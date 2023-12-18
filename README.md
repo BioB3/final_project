@@ -80,6 +80,8 @@ This class's needed arguments are id, role, and DB
 # How to run?
   - download the files needed
   - run the project_manage.py file.
+  - enter the value that the program asked for
+*The input in menu have to be the same as the choices but is not case-sensitive*
 
 # Actions
 |Role|Action|Input recieved|Releated Method(Class)|Completion percentage|
